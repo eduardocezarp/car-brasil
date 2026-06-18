@@ -1,1 +1,234 @@
-<h1>CAR Brasil</h1>
+Cole todo o conteúdo abaixo no index.html:
+Redação
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>CAR Brasil</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+
+html,body,#map{
+height:100%;
+margin:0;
+padding:0;
+font-family:Arial,sans-serif;
+}
+
+#map{
+height:100%;
+}
+
+.painel{
+position:absolute;
+top:10px;
+left:10px;
+z-index:1000;
+background:white;
+padding:12px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,.3);
+width:320px;
+max-height:90vh;
+overflow:auto;
+}
+
+h3{
+margin:0 0 10px 0;
+color:#00AE9D;
+}
+
+select,input,button{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:8px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+background:#00AE9D;
+color:white;
+border:none;
+font-weight:bold;
+}
+
+.info{
+font-size:13px;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="painel">
+
+<h3>🌎 CAR Brasil</h3>
+
+<label>Estado</label>
+
+<select id="estado">
+<option value="pr">Paraná</option>
+<option value="ms">Mato Grosso do Sul</option>
+<option value="mt">Mato Grosso</option>
+<option value="go">Goiás</option>
+<option value="sc">Santa Catarina</option>
+<option value="rs">Rio Grande do Sul</option>
+<option value="sp">São Paulo</option>
+<option value="mg">Minas Gerais</option>
+<option value="ba">Bahia</option>
+<option value="pa">Pará</option>
+</select>
+
+<label>Município</label>
+
+<input id="municipio" placeholder="Digite o município">
+
+<button onclick="buscarMunicipio()">
+Buscar Município
+</button>
+
+<div class="info" id="resultado">
+Nenhuma consulta realizada.
+</div>
+
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+var map = L.map('map').setView([-15,-54],4);
+
+var satelite = L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{
+maxZoom:19
+}
+).addTo(map);
+
+var ruas = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+maxZoom:19
+}
+);
+
+var baseMaps = {
+"Satélite": satelite,
+"Ruas": ruas
+};
+
+L.control.layers(baseMaps).addTo(map);
+
+var camadaAtual;
+
+function buscarMunicipio(){
+
+let estado =
+document.getElementById("estado").value;
+
+let municipio =
+document.getElementById("municipio").value;
+
+if(!municipio){
+alert("Digite um município");
+return;
+}
+
+if(camadaAtual){
+map.removeLayer(camadaAtual);
+}
+
+let camada =
+"sicar:sicar_imoveis_" + estado;
+
+let url =
+"https://geoserver.car.gov.br/geoserver/sicar/ows?service=WFS&version=1.0.0&request=GetFeature&typeName="
++ camada +
+"&outputFormat=application/json&CQL_FILTER=municipio='" +
+municipio + "'";
+
+fetch(url)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("resultado").innerHTML =
+"Imóveis encontrados: " +
+data.features.length;
+
+camadaAtual = L.geoJSON(data,{
+
+style:{
+color:"#00AE9D",
+weight:2
+},
+
+onEachFeature:function(feature,layer){
+
+let p = feature.properties;
+
+layer.bindPopup(
+
+"<b>CAR:</b> " + (p.cod_imovel || "") +
+
+"<br><b>Município:</b> " + (p.municipio || "") +
+
+"<br><b>Área:</b> " + (p.area || "") + " ha" +
+
+"<br><b>Status:</b> " + (p.status_imovel || "") +
+
+"<br><b>Condição:</b> " + (p.condicao || "") +
+
+"<br><b>Módulos fiscais:</b> " + (p.m_fiscal || "") +
+
+"<br><b>Tipo:</b> " + (p.tipo_imovel || "");
+
+}
+
+}).addTo(map);
+
+if(data.features.length > 0){
+map.fitBounds(camadaAtual.getBounds());
+}
+
+})
+
+.catch(function(){
+
+alert(
+"Não foi possível carregar os dados."
+);
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
+Depois:
+Clique em Commit changes
+Clique novamente em Commit changes
+Aguarde 1 minuto
+Abra:
+eduardocezarp.github.io⁠�
+Teste com:
+Estado: Paraná
+Município: Londrina
+E me diga:
+Se o mapa abriu;
+Se encontrou imóveis;
+Se os popups apareceram ao clicar.
